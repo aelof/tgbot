@@ -178,14 +178,3 @@ def show_inline(call):
 
 
 tb.polling(none_stop=True)
-
-
-
-# it's a test line '
- # if a: 12
- test line
-
-
-
-allalalalalal
-

@@ -40,6 +40,9 @@ def get_number(message):
     kbrd_start2.add(btn1_start, btn2_start, btn3_start)
     tb.send_message(message.chat.id, 'Ваш заказ сформирован! \nМенеджер свяжется для уточнения деталей',
                     reply_markup=kbrd_start2)
+    data_erase_cart_afteroffer = {'type': 'clearcart', 'chat_id': message.chat.id}
+    z = requests.post(URL_ED, params=data_erase_cart_afteroffer)
+
 
 # erase shoping cart
 @tb.callback_query_handler(func=lambda call: call.data == 'erase_cart')
@@ -149,16 +152,12 @@ def show_inline(call):
         kbrd_products.add(kbrd_back_to_cat)
         tb.edit_message_text(chat_id=cmci, message_id=call.message.message_id,
                              text='Товары в категории', reply_markup=kbrd_products)
+        print(r1)
 
     elif 'prod' in value_id:
 
         prod_id = value_id.replace('prod', '')
         data_addtocart = {'type': 'addtocart', 'chat_id': cmci, 'prod_id': prod_id}
-        kbrd_cart = types.InlineKeyboardMarkup(row_width=2)
-        btn1_cart = types.InlineKeyboardButton("Очистить корзину", callback_data='erase')
-        btn2_cart = types.InlineKeyboardButton("Заказать!", callback_data='offer', )
-        kbrd_cart.add(btn1_cart, btn2_cart)
-
         r1 = requests.get(URL_ED, params=data_addtocart)
         r1 = r1.json()
         # tb.send_message(cmci, '<>')

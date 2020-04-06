@@ -72,10 +72,13 @@ def shoping_cart(message):
         answer = '*Ваш заказ:* \r\n\r\n'
         i = 1
         print(r_cart['products'])
+        check = 0
         for id in r_cart['products']:
             product = r_cart['products'][id]
-            answer += str(i) + '. ' + product['name'] + '\r\n' + str(product['price']) + 'р' + '\r\n\r\n'
+            check = check +  product["price"]
+            answer += f' {i}. {product["name"]}  \r\n \r*{product["price"]}р.*  \r\n\r\n'
             i += 1
+        answer = f'{answer} \r\n Сумма заказа: *{check} рублей* '
         tb.send_message(mci, answer, parse_mode='Markdown', reply_markup=kbrd_cart)
     else:
         tb.send_message(mci, "Корзина пуста")
@@ -178,7 +181,3 @@ def show_inline(call):
 
 
 tb.polling(none_stop=True)
-
-
-
-lalallallalalallal

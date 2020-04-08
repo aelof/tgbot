@@ -58,6 +58,7 @@ def cart0(call):
         tb.edit_message_text(chat_id=cmci, message_id=call.message.message_id,
                              text='Вы очистили корзину', reply_markup=None)
 
+
 # shoping cart / Корзина
 @tb.message_handler(func=lambda message: message.text == 'Корзина')
 def shoping_cart(message):
@@ -78,7 +79,7 @@ def shoping_cart(message):
         check = 0
         for id in r_cart['products']:
             product = r_cart['products'][id]
-            check = check +  product["price"]
+            check = check + product["price"]
             answer += f' {i}. {product["name"]}  \r\n \r*{product["price"]}р.*  \r\n\r\n'
             i += 1
         answer = f'{answer} \r\n Сумма заказа: *{check} рублей* '
@@ -141,7 +142,6 @@ def show_inline(call):
 
         data_products = {'type': 'products'}
 
-
         if 'offset' in value_id:
             # Was clicked on show more products
             value_params = value_id.split('|')
@@ -158,21 +158,23 @@ def show_inline(call):
         r1 = requests.get(URL_ED, params=data_products)
         r1 = r1.json()
 
-        for i in r1:
+        for i in r1['products']:
             if i['weight'] != None:
-                item = types.InlineKeyboardButton(f'{i["name"]} - {i["price"]}р. | {i["weight"]}гр.', callback_data = "prod" + str(i["id"]))
+                item = types.InlineKeyboardButton(f'{i["name"]} - {i["price"]}р. | {i["weight"]}гр.',
+                                                  callback_data="prod" + str(i["id"]))
             else:
-                item = types.InlineKeyboardButton(f'{i["name"]} - {i["price"]}р.', callback_data = "prod" + str(i["id"]))
-        
+                item = types.InlineKeyboardButton(f'{i["name"]} - {i["price"]}р.', callback_data="prod" + str(i["id"]))
+
             kbrd_products.add(item)
 
-        if r1['next_offset'] != None:
+        if 'next_offset' in r1:
             # Category has more products let's' show them
-            kbrd_products.add(types.InlineKeyboardButton('Показать еще ..', callback_data='cat'+str(cat_id)+'|offset'+str(r1['next_offset'])))
+            kbrd_products.add(types.InlineKeyboardButton('Показать еще ..',
+                                                         callback_data='cat' + str(cat_id) + '|offset' + str(
+                                                             r1['next_offset'])))
 
         kbrd_back_to_cat = types.InlineKeyboardButton('<- Категории', callback_data='back_to_cat')
         kbrd_products.add(kbrd_back_to_cat)
-
 
         tb.edit_message_text(chat_id=cmci, message_id=call.message.message_id,
                              text='Товары в категории', reply_markup=kbrd_products)

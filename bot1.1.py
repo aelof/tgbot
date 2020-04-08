@@ -31,7 +31,10 @@ def start(message):
 def get_number(message):
     tb.send_message(message.chat.id,
                     f'{message.from_user.first_name} ({message.from_user.username}  {message.contact.phone_number}')
-    print(shoping_cart)
+
+    print(f'Number: {message.contact}')
+    # data_to_us = {}
+    # p = requests.post()
     # tb.send_message('AAAAAEp00mJ7KmmnehxJuA', shoping_cart )
     kbrd_start2 = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     btn1_start = types.KeyboardButton('Заказать продукты')
@@ -40,7 +43,7 @@ def get_number(message):
     kbrd_start2.add(btn1_start, btn2_start, btn3_start)
     tb.send_message(message.chat.id, 'Ваш заказ сформирован! \nМенеджер свяжется для уточнения деталей',
                     reply_markup=kbrd_start2)
-    data_erase_cart_afteroffer = {'type': 'clearcart', 'chat_id': message.chat.id}
+    data_erase_cart_afteroffer = {'type': 'clearcart', 'chat_id': message.chat.id, 'token':config.token_ed}
     z = requests.post(URL_ED, params=data_erase_cart_afteroffer)
 
 
@@ -49,7 +52,7 @@ def get_number(message):
 def cart0(call):
     if call.data == 'erase_cart':
         cmci = call.message.chat.id
-        data_erase_cart = {'type': 'clearcart', 'chat_id': cmci}
+        data_erase_cart = {'type': 'clearcart', 'chat_id': cmci, 'token':config.token_ed}
         z = requests.post(URL_ED, params=data_erase_cart)
         print(z)
         tb.answer_callback_query(callback_query_id=call.id, show_alert=False,
@@ -69,7 +72,7 @@ def shoping_cart(message):
 
     mci = message.chat.id
 
-    data_cart = {'type': 'getcart', 'chat_id': mci}
+    data_cart = {'type': 'getcart', 'chat_id': mci, 'token':config.token_ed}
     r_cart = requests.get(URL_ED, params=data_cart)
     r_cart = r_cart.json()
     if r_cart['products']:
@@ -93,13 +96,13 @@ def show_categories(message):
     mci = message.chat.id
     if message.text == 'Заказать продукты':
         kbrd_cats = types.InlineKeyboardMarkup(row_width=2)
-        data_cat = {'type': 'categories'}
+        data_cat = {'type': 'categories', 'token':config.token_ed}
         r0 = requests.get(URL_ED, params=data_cat)
         r0 = r0.json()
         for i in r0:
             item2 = types.InlineKeyboardButton(i['name'], callback_data='cat' + str(i['id']))
             kbrd_cats.add(item2)
-        kbrd_catsnext = types.InlineKeyboardButton('Next', callback_data='nextcat')
+        kbrd_catsnext = types.InlineKeyboardButton('Показать ещё ... ', callback_data='nextcat')
         kbrd_cats.add(kbrd_catsnext)
         tb.send_message(mci, "Выбирете категорию", reply_markup=kbrd_cats)
 
@@ -122,7 +125,7 @@ def back_to_cat(call):
     if call.data == 'back_to_cat':
         tb.answer_callback_query(callback_query_id=call.id, show_alert=False, text="Назад в категории")
         kbrd_cats = types.InlineKeyboardMarkup(row_width=1)
-        payload = {'type': 'categories'}
+        payload = {'type': 'categories', 'token':config.token_ed}
         r = requests.get(URL_ED, params=payload)
         r = r.json()
         for i in r:
@@ -140,7 +143,7 @@ def show_inline(call):
 
     if 'cat' in value_id:
 
-        data_products = {'type': 'products'}
+        data_products = {'type': 'products', 'token':config.token_ed}
 
         if 'offset' in value_id:
             # Was clicked on show more products
@@ -169,7 +172,7 @@ def show_inline(call):
 
         if 'next_offset' in r1:
             # Category has more products let's' show them
-            kbrd_products.add(types.InlineKeyboardButton('Показать еще ..',
+            kbrd_products.add(types.InlineKeyboardButton('Показать еще ...',
                                                          callback_data='cat' + str(cat_id) + '|offset' + str(
                                                              r1['next_offset'])))
 
@@ -183,7 +186,7 @@ def show_inline(call):
     elif 'prod' in value_id:
 
         prod_id = value_id.replace('prod', '')
-        data_addtocart = {'type': 'addtocart', 'chat_id': cmci, 'prod_id': prod_id}
+        data_addtocart = {'type': 'addtocart', 'chat_id': cmci, 'prod_id': prod_id, 'token':config.token_ed}
         r1 = requests.get(URL_ED, params=data_addtocart)
         r1 = r1.json()
         # tb.send_message(cmci, '<>')

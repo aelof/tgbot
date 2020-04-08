@@ -139,20 +139,41 @@ def show_inline(call):
 
     if 'cat' in value_id:
 
-        cat_id = value_id.replace('cat', '')
-        data_products = {'type': 'products', 'cat_id': cat_id}
+        data_products = {'type': 'products'}
+
+
+        if 'offset' in value_id:
+            # Was clicked on show more products
+            value_params = value_id.split('|')
+
+            cat_id = value_params[0].replace('cat', '')
+            data_products['offset'] = value_params[1].replace('offset', '')
+        else:
+            # Was clicked on category
+            cat_id = value_id.replace('cat', '')
+
+        data_products['cat_id'] = cat_id
+
         kbrd_products = types.InlineKeyboardMarkup(row_width=2)
         r1 = requests.get(URL_ED, params=data_products)
         r1 = r1.json()
+
         for i in r1:
             if i['weight'] != None:
                 item = types.InlineKeyboardButton(f'{i["name"]} - {i["price"]}р. | {i["weight"]}гр.', callback_data = "prod" + str(i["id"]))
-                kbrd_products.add(item)
             else:
                 item = types.InlineKeyboardButton(f'{i["name"]} - {i["price"]}р.', callback_data = "prod" + str(i["id"]))
-                kbrd_products.add(item)
+        
+            kbrd_products.add(item)
+
+        if r1['next_offset'] != None:
+            # Category has more products let's' show them
+            kbrd_products.add(types.InlineKeyboardButton('Показать еще ..', callback_data='cat'+str(cat_id)+'|offset'+str(r1['next_offset'])))
+
         kbrd_back_to_cat = types.InlineKeyboardButton('<- Категории', callback_data='back_to_cat')
         kbrd_products.add(kbrd_back_to_cat)
+
+
         tb.edit_message_text(chat_id=cmci, message_id=call.message.message_id,
                              text='Товары в категории', reply_markup=kbrd_products)
         print(r1)

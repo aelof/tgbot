@@ -31,9 +31,11 @@ def start(message):
 def get_number(message):
     tb.send_message(message.chat.id,
                     f'{message.from_user.first_name} ({message.from_user.username}  {message.contact.phone_number}')
+    mci = message.chat.id
+    mc = message.contact
 
-    # data_to_us = {}
-    # p = requests.post(, 'token':config.token_ed)
+    data_to_us = {'type': 'sendorder', 'chat_id': mci, 'phone': mc, 'token': config.token_ed}
+    p = requests.post(URL_ED, params=data_to_us)
     kbrd_start2 = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     btn1_start = types.KeyboardButton('Заказать продукты')
     btn2_start = types.KeyboardButton('Корзина')
@@ -41,8 +43,7 @@ def get_number(message):
     kbrd_start2.add(btn1_start, btn2_start, btn3_start)
     tb.send_message(message.chat.id, 'Ваш заказ сформирован! \nМенеджер свяжется для уточнения деталей',
                     reply_markup=kbrd_start2)
-    data_erase_cart_afteroffer = {'type': 'clearcart', 'chat_id': message.chat.id, 'token': config.token_ed}
-    z = requests.post(URL_ED, params=data_erase_cart_afteroffer)
+
 
 
 # erase shoping cart
@@ -97,6 +98,7 @@ def show_categories(message):
         data_cat = {'type': 'categories', 'token': config.token_ed}
         r0 = requests.get(URL_ED, params=data_cat)
         r0 = r0.json()
+        print(r0)
         for i in r0:
             item2 = types.InlineKeyboardButton(i['name'], callback_data='cat' + str(i['id']))
             kbrd_cats.add(item2)
@@ -135,7 +137,6 @@ def back_to_cat(call):
 # heandler for all call back
 @tb.callback_query_handler(func=lambda call: True)
 def show_inline(call):
-
     cmci = call.message.chat.id
     value_id = str(call.data)
 
@@ -155,6 +156,7 @@ def show_inline(call):
         kbrd_products = types.InlineKeyboardMarkup(row_width=2)
         r1 = requests.get(URL_ED, params=data_products)
         r1 = r1.json()
+        print(r1)
 
         for i in r1['products']:
             if i['weight'] != None:
@@ -198,5 +200,6 @@ def show_inline(call):
         kbrd_getphone.add(btn1_getphone, btn2_getphone)
         tb.send_message(cmci, 'Поделитесь номером телефоном', reply_markup=kbrd_getphone)
         kbrd_start = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+
 
 tb.polling(none_stop=True)

@@ -30,9 +30,10 @@ def get_number(message):
     tb.send_message(message.chat.id,
                     f'{message.from_user.first_name} ({message.from_user.username}  {message.contact.phone_number}')
     mci = message.chat.id
-    mc = message.contact
 
-    data_to_us = {'type': 'sendorder', 'chat_id': mci, 'phone': mc, 'token': config.token_ed}
+    phone = message.contact.phone_number
+    data_to_us = {'type': 'sendorder', 'chat_id': mci, 'phone': phone, 'token': config.token_ed}
+    
     p = requests.post(URL_ED, params=data_to_us)
     kbrd_start2 = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     btn1_start = types.KeyboardButton('Заказать продукты')

@@ -100,7 +100,7 @@ def show_categories(message):
         tb.send_message(mci, "Выбирете категорию", reply_markup=kbrd_cats)
 
     if message.text == 'Как пользоваться?':
-        tb.send_message(mci, 'Инструкция пользования (13:38 09.04) :)')
+        tb.send_message(mci, '(Инструкция пользования)')
 
     if message.text == 'Назад':
         kbrd_start = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
@@ -185,7 +185,7 @@ def show_inline(call):
                                  text=answer)
 
     if call.data == 'offer':
-        kbrd_getphone = types.ReplyKeyboardMarkup(resize_keyboard=1, one_time_keyboard=True)
+        kbrd_getphone = types.ReplyKeyboardMarkup(resize_keyboard=1)
         btn1_getphone = types.KeyboardButton('Поделиться номером', request_contact=True)
         btn2_getphone = types.KeyboardButton('Назад')
         kbrd_getphone.add(btn1_getphone, btn2_getphone)

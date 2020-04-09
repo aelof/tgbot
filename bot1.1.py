@@ -97,8 +97,6 @@ def show_categories(message):
         for i in r0:
             item2 = types.InlineKeyboardButton(i['name'], callback_data='cat' + str(i['id']))
             kbrd_cats.add(item2)
-        kbrd_catsnext = types.InlineKeyboardButton('Показать ещё ... ', callback_data='nextcat')
-        kbrd_cats.add(kbrd_catsnext)
         tb.send_message(mci, "Выбирете категорию", reply_markup=kbrd_cats)
 
     if message.text == 'Как пользоваться?':

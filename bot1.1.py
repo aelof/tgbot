@@ -100,7 +100,7 @@ def show_categories(message):
         tb.send_message(mci, "Выбирете категорию", reply_markup=kbrd_cats)
 
     if message.text == 'Как пользоваться?':
-        tb.send_message(mci, 'Инструкция пользования :)')
+        tb.send_message(mci, 'Инструкция пользования (13:38 09.04) :)')
 
     if message.text == 'Назад':
         kbrd_start = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)

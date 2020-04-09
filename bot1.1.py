@@ -4,8 +4,6 @@ import telebot
 from telebot import types
 
 import json
-import pprint
-import logging
 import requests
 import config
 
@@ -53,7 +51,6 @@ def cart0(call):
         cmci = call.message.chat.id
         data_erase_cart = {'type': 'clearcart', 'chat_id': cmci, 'token': config.token_ed}
         z = requests.post(URL_ED, params=data_erase_cart)
-        print(z)
         tb.answer_callback_query(callback_query_id=call.id, show_alert=False,
                                  text="Корзина ощищена")
 
@@ -77,7 +74,6 @@ def shoping_cart(message):
     if r_cart['products']:
         answer = '*Ваш заказ:* \r\n\r\n'
         i = 1
-        print(r_cart['products'])
         check = 0
         for id in r_cart['products']:
             product = r_cart['products'][id]
@@ -98,7 +94,6 @@ def show_categories(message):
         data_cat = {'type': 'categories', 'token': config.token_ed}
         r0 = requests.get(URL_ED, params=data_cat)
         r0 = r0.json()
-        print(r0)
         for i in r0:
             item2 = types.InlineKeyboardButton(i['name'], callback_data='cat' + str(i['id']))
             kbrd_cats.add(item2)
@@ -156,7 +151,6 @@ def show_inline(call):
         kbrd_products = types.InlineKeyboardMarkup(row_width=2)
         r1 = requests.get(URL_ED, params=data_products)
         r1 = r1.json()
-        print(r1)
 
         for i in r1['products']:
             if i['weight'] != None:
@@ -177,7 +171,6 @@ def show_inline(call):
 
         tb.edit_message_text(chat_id=cmci, message_id=call.message.message_id,
                              text='Товары в категории', reply_markup=kbrd_products)
-        print(r1)
 
     elif 'prod' in value_id:
 

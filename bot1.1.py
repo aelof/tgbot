@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # add processing of 'left' messages
+# test for server
 
 import telebot
 from telebot import types

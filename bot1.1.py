@@ -22,7 +22,7 @@ def start(message):
     btn3_start = types.KeyboardButton('Как пользоваться?')
     kbrd_start.add(btn1_start, btn2_start, btn3_start)
     mci = message.chat.id
-    tb.send_message(mci, 'Бот доставки продуктов по Геленджику.\n'
+    tb.send_message(mci, 'Бот доставки продуктов по Геленджику *ЖОПА*.\n'
                          '\r\nПоможет заказать еду в текущих реалиях.\n'
                          '\n\n_Рекомендуется ознакомиться с его работой (нажмите "Как пользоваться?")_',
                     parse_mode='Markdown', reply_markup=kbrd_start)

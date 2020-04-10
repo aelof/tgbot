@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# add processing of 'left' messages
 
 import telebot
 from telebot import types
@@ -21,21 +20,19 @@ def start(message):
     btn3_start = types.KeyboardButton('Как пользоваться?')
     kbrd_start.add(btn1_start, btn2_start, btn3_start)
     mci = message.chat.id
-    tb.send_message(mci, 'Бот доставки продуктов по Геленджику.\n'
-                         '\r\nПоможет заказать еду в текущих реалиях.\n'
-                         '\n\n_Рекомендуется ознакомиться с его работой (нажмите "Как пользоваться?")_',
-                    parse_mode='Markdown', reply_markup=kbrd_start)
+    tb.send_message(mci, 'Бот доставки продуктов по Геленджику. Поможет заказть еду в текущих реалиях ',
+                    reply_markup=kbrd_start)
 
 
 # heandler phome nimber /заправшивает номер клиента
 @tb.message_handler(content_types=['contact'])
 def get_number(message):
-
+    tb.send_message(message.chat.id,
+                    f'{message.from_user.first_name} ({message.from_user.username}  {message.contact.phone_number}')
     mci = message.chat.id
+    mc = message.contact
 
-    phone = message.contact.phone_number
-    data_to_us = {'type': 'sendorder', 'chat_id': mci, 'phone': phone, 'token': config.token_ed}
-
+    data_to_us = {'type': 'sendorder', 'chat_id': mci, 'phone': mc, 'token': config.token_ed}
     p = requests.post(URL_ED, params=data_to_us)
     kbrd_start2 = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     btn1_start = types.KeyboardButton('Заказать продукты')
@@ -44,6 +41,7 @@ def get_number(message):
     kbrd_start2.add(btn1_start, btn2_start, btn3_start)
     tb.send_message(message.chat.id, 'Ваш заказ сформирован! \nМенеджер свяжется для уточнения деталей',
                     reply_markup=kbrd_start2)
+
 
 
 # erase shoping cart
@@ -94,24 +92,23 @@ def show_categories(message):
     if message.text == 'Заказать продукты':
         kbrd_cats = types.InlineKeyboardMarkup(row_width=2)
         data_cat = {'type': 'categories', 'token': config.token_ed}
-        global r0
         r0 = requests.get(URL_ED, params=data_cat)
         r0 = r0.json()
         for i in r0:
             item2 = types.InlineKeyboardButton(i['name'], callback_data='cat' + str(i['id']))
             kbrd_cats.add(item2)
         tb.send_message(mci, "Выбирете категорию", reply_markup=kbrd_cats)
-    elif message.text == 'Как пользоваться?':
+
+    if message.text == 'Как пользоваться?':
         tb.send_message(mci, '(Инструкция пользования)')
-    elif message.text == 'Назад':
+
+    if message.text == 'Назад':
         kbrd_start = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
         btn1_start = types.KeyboardButton('Заказать продукты')
         btn2_start = types.KeyboardButton('Корзина')
         btn3_start = types.KeyboardButton('Как пользоваться?')
         kbrd_start.add(btn1_start, btn2_start, btn3_start)
         tb.send_message(mci, 'Главное меню:', reply_markup=kbrd_start)
-    else:
-        tb.send_message(mci, '(Инструкция пользования)' )
 
 
 # heandler for button "back to categories"
@@ -119,7 +116,6 @@ def show_categories(message):
 def back_to_cat(call):
     cmci = call.message.chat.id
     if call.data == 'back_to_cat':
-        tb.delete_message(cmci, message_id=mid)
         tb.answer_callback_query(callback_query_id=call.id, show_alert=False, text="Назад в категории")
         kbrd_cats = types.InlineKeyboardMarkup(row_width=1)
         payload = {'type': 'categories', 'token': config.token_ed}
@@ -128,7 +124,7 @@ def back_to_cat(call):
         for i in r:
             item = types.InlineKeyboardButton(i['name'], callback_data='cat' + str(i['id']))
             kbrd_cats.add(item)
-        tb.send_message(cmci, "Выберите категорию: ", reply_markup=kbrd_cats)
+        tb.send_message(cmci, "Выбирете категорию", reply_markup=kbrd_cats)
 
 
 # heandler for all call back
@@ -168,12 +164,11 @@ def show_inline(call):
                                                          callback_data='cat' + str(cat_id) + '|offset' + str(
                                                              r1['next_offset'])))
 
-        kbrd_back_to_cat = types.InlineKeyboardButton('Назад в "Категории"', callback_data='back_to_cat')
+        kbrd_back_to_cat = types.InlineKeyboardButton('<- Категории', callback_data='back_to_cat')
         kbrd_products.add(kbrd_back_to_cat)
-        global mid
-        mid = call.message.message_id
+
         tb.edit_message_text(chat_id=cmci, message_id=call.message.message_id,
-                             text='Товары в категории: ', reply_markup=kbrd_products)
+                             text='Товары в категории', reply_markup=kbrd_products)
 
     elif 'prod' in value_id:
 

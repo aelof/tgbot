@@ -229,7 +229,6 @@ def show_inline(call):
         data_addtocart = {'type': 'addtocart', 'chat_id': cmci, 'prod_id': prod_id, 'token': config.token_ed}
         r1 = requests.get(URL_ED, params=data_addtocart)
         r1 = r1.json()
-        print(r1)
         if 'new_product_id' not in r1:
             answer = 'Товар уже есть в корзине'
         else:

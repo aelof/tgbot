@@ -5,10 +5,10 @@ from telebot import types
 
 import json
 import requests
-import config2
+import config
 
-tb = telebot.TeleBot(config2.token)
-URL_ED = config2.URL_ED
+tb = telebot.TeleBot(config.token)
+URL_ED = config.URL_ED
 
 manual = '''
 *Инструкция пользования:*\r\n
@@ -61,7 +61,7 @@ def get_number(message):
         ttime = message.date
         phone = message.contact.phone_number
         global data_to_us
-        data_to_us = {'type': 'sendorder', 'chat_id': mci, 'phone': phone, 'token': config2.token_ed}
+        data_to_us = {'type': 'sendorder', 'chat_id': mci, 'phone': phone, 'token': config.token_ed}
         kbrd_voice = types.InlineKeyboardMarkup()
         btn1_voice = types.InlineKeyboardButton('Деталей нет', callback_data='pass_voice')
         kbrd_voice.add(btn1_voice)
@@ -118,7 +118,7 @@ def voice(call):
 def cart0(call):
     if call.data == 'erase_cart':
         cmci = call.message.chat.id
-        data_erase_cart = {'type': 'clearcart', 'chat_id': cmci, 'token': config2.token_ed}
+        data_erase_cart = {'type': 'clearcart', 'chat_id': cmci, 'token': config.token_ed}
         z = requests.post(URL_ED, params=data_erase_cart)
         tb.answer_callback_query(callback_query_id=call.id, show_alert=False,
                                  text="Корзина ощищена")
@@ -135,7 +135,7 @@ def shoping_cart(message):
     btn2_cart = types.InlineKeyboardButton("Заказать!", callback_data='offer', )
     kbrd_cart.add(btn1_cart, btn2_cart)
     mci = message.chat.id
-    data_cart = {'type': 'getcart', 'chat_id': mci, 'token': config2.token_ed}
+    data_cart = {'type': 'getcart', 'chat_id': mci, 'token': config.token_ed}
     r_cart = requests.get(URL_ED, params=data_cart)
     r_cart = r_cart.json()
     if r_cart['products']:
@@ -158,7 +158,7 @@ def show_categories(message):
     mci = message.chat.id
     if message.text == 'Заказать продукты 🍽':
         kbrd_cats = types.InlineKeyboardMarkup(row_width=3)
-        data_cat = {'type': 'categories', 'token': config2.token_ed}
+        data_cat = {'type': 'categories', 'token': config.token_ed}
         r0 = requests.get(URL_ED, params=data_cat)
         list = []
         r0 = r0.json()
@@ -189,7 +189,7 @@ def back_to_cat(call):
     if call.data == 'back_to_cat':
         tb.answer_callback_query(callback_query_id=call.id, show_alert=False, text="Назад в категории")
         kbrd_cats = types.InlineKeyboardMarkup(row_width=3)
-        payload = {'type': 'categories', 'token': config2.token_ed}
+        payload = {'type': 'categories', 'token': config.token_ed}
         r = requests.get(URL_ED, params=payload)
         r = r.json()
         list2 = []
@@ -211,7 +211,7 @@ def show_inline(call):
     value_id = str(call.data)
 
     if 'cat' in value_id:
-        data_products = {'type': 'products', 'token': config2.token_ed}
+        data_products = {'type': 'products', 'token': config.token_ed}
         if 'offset' in value_id:
             # Was clicked on show more products
             value_params = value_id.split('|')
@@ -248,7 +248,7 @@ def show_inline(call):
 
     elif 'prod' in value_id:
         prod_id = value_id.replace('prod', '')
-        data_addtocart = {'type': 'addtocart', 'chat_id': cmci, 'prod_id': prod_id, 'token': config2.token_ed}
+        data_addtocart = {'type': 'addtocart', 'chat_id': cmci, 'prod_id': prod_id, 'token': config.token_ed}
         r1 = requests.get(URL_ED, params=data_addtocart)
         r1 = r1.json()
         if 'new_product_id' not in r1:

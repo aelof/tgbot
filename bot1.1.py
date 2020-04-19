@@ -81,7 +81,8 @@ def get_number(message):
                     kbrd_start2.add(btn1_start)
                     kbrd_start2.add(btn3_start, btn2_start)
                     tb.forward_message("@deliiivery", mci, message.message_id)
-                    tb.send_message(message.chat.id, '*Ваш заказ сформирован!\r\nМенеджер свяжется c Вами для уточнения деталей*',
+                    tb.send_message(message.chat.id,
+                                    '*Ваш заказ сформирован!\r\nМенеджер свяжется c Вами для уточнения деталей*',
                                     reply_markup=kbrd_start2, parse_mode='Markdown')
                     tb.send_message(call.message.chat.id, 'Давайте вместе улучшим этот сервис!'
                                                           'Расскажите, что можно улучшить'
@@ -102,7 +103,8 @@ def voice(call):
         btn3_start = types.KeyboardButton('Инструкция 📕')
         kbrd_start2.add(btn1_start)
         kbrd_start2.add(btn3_start, btn2_start)
-        tb.send_message(call.message.chat.id, '*Ваш заказ сформирован!\r\nМенеджер свяжется c Вами для уточнения деталей*',
+        tb.send_message(call.message.chat.id,
+                        '*Ваш заказ сформирован!\r\nМенеджер свяжется c Вами для уточнения деталей*',
                         reply_markup=kbrd_start2, parse_mode='Markdown')
         tb.send_message(call.message.chat.id, 'Давайте вместе улучшим этот сервис!'
                                               'Расскажите, что можно улучшить'
@@ -112,6 +114,7 @@ def voice(call):
             p = requests.post(URL_ED, params=data_to_us)
         except:
             pass
+
 
 # erase shoping cart
 @tb.callback_query_handler(func=lambda call: call.data == 'erase_cart')

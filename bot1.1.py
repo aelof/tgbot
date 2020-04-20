@@ -27,12 +27,17 @@ startmessage = '''
 Поможет заказать продукты домой 🏠
 Ассортимент пока мал, но постоянно пополняется !\n
 _Рекомендуется ознакомиться с его работой (нажм."Инструкция")_',
+\r\nОбсуждения -https://t.me/deliveryGLK
 '''
 short = '''
 *Сокращения:*
 б/к - без кости
 c/м - свежезамороженные
 подбед. - подбедерок
+копч. - копченая 
+Куб.Мол. - Кубанский молочник
+Куб.Бур. - Кубанская буренка
+
 '''
 
 
@@ -47,7 +52,7 @@ def start(message):
     kbrd_start.add(btn3_start, btn2_start)
     mci = message.chat.id
     if message.text == '/start':
-        tb.send_message(mci, startmessage, parse_mode='Markdown', reply_markup=kbrd_start)
+        tb.send_message(mci, startmessage, parse_mode='Markdown', reply_markup=kbrd_start,disable_web_page_preview=True)
     elif message.text == '/short':
         tb.send_message(mci, short, parse_mode='Markdown', reply_markup=kbrd_start)
 
@@ -225,6 +230,7 @@ def show_inline(call):
             cat_id = value_id.replace('cat', '')
         data_products['cat_id'] = cat_id
         kbrd_products = types.InlineKeyboardMarkup(row_width=2)
+
         r1 = requests.get(URL_ED, params=data_products)
         r1 = r1.json()
         for i in r1['products']:
@@ -262,14 +268,30 @@ def show_inline(call):
                                  text=answer)
 
     if call.data == 'offer':
-        kbrd_getphone = types.ReplyKeyboardMarkup(resize_keyboard=1, one_time_keyboard=True)
-        btn1_getphone = types.KeyboardButton('Поделиться ', request_contact=True)
-        btn2_getphone = types.KeyboardButton('Назад')
-        kbrd_getphone.add(btn2_getphone, btn1_getphone)
-        tb.send_message(cmci, 'Поделитесь номером телефоном\n\n'
-                              '_(Это нужно для уточнения деталей доставки)_', parse_mode='Markdown',
-                        reply_markup=kbrd_getphone, )
-        kbrd_start = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+        data_cart = {'type': 'getcart', 'chat_id': call.message.chat.id, 'token': config.token_ed}
+        r_cart = requests.get(URL_ED, params=data_cart)
+        r_cart = r_cart.json()
+        if r_cart['total_price'] < 1200:
+            kbrd_cats = types.InlineKeyboardMarkup(row_width=3)
+            data_cat = {'type': 'categories', 'token': config.token_ed}
+            r0 = requests.get(URL_ED, params=data_cat)
+            list1 = []
+            r0 = r0.json()
+            for i in r0:
+                item = types.InlineKeyboardButton(str(i['name']), callback_data='cat' + str(i['id']))
+                list1.append(item)
+            kbrd_cats.add(*list1)
+            tb.send_message(cmci, 'Добавьте ещё продуктов, чтобы сумма заказа была *от 1200 рублей*',
+                            reply_markup=kbrd_cats, parse_mode='Markdown')
+        else:
+            kbrd_getphone = types.ReplyKeyboardMarkup(resize_keyboard=1, one_time_keyboard=True)
+            btn1_getphone = types.KeyboardButton('Поделиться ', request_contact=True)
+            btn2_getphone = types.KeyboardButton('Назад')
+            kbrd_getphone.add(btn2_getphone, btn1_getphone)
+            tb.send_message(cmci, 'Поделитесь номером телефоном\n\n'
+                                  '_(Это нужно для уточнения деталей доставки)_', parse_mode='Markdown',
+                            reply_markup=kbrd_getphone, )
+            kbrd_start = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
 
 
 # start bot

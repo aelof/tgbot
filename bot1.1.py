@@ -41,7 +41,6 @@ c/м - свежезамороженные
 
 '''
 
-
 @tb.message_handler(commands=['start', 'short'])
 def start(message):
     # buttons main menu

@@ -12,14 +12,15 @@ URL_ED = config.URL_ED
 
 manual = '''
 *Инструкция пользования:*\r\n
-Для того, чтобы добавить товар в корзину нажм. на кнопку с названием продукта. \r\n
+*Оплата происходит после получения (налич./безнал.)\r\nДоставка происходит после 16:00*
+\r\nДля того, чтобы добавить товар в корзину нажм. на кнопку с названием продукта. \r\n
 Хотите добавить второй такой же товар - нажмите на продукт ещё раз .\r\n
 Весь заказ в любой момент можно просмотреть нажав. *Корзина* 🧺
 Хотите оформить заказ - нажм. *заказать*, после этого
 Вам будет предложено поделиться номером телефона и оставить голосовое 
 сообщения для внесения поправок в заказ _напр. "Отрежьте, пожалуйста,  350 гр. сыра "Черный Принц!" 
-(по умолчанию добавляет 1 кг.)_
-\r\nВот и всё заказ сформирован. Далее с Вами свяжутся, для уточнения деталей доставки. 
+(по умолчанию добавляет 1 кг.)_ \r\nили _"Уберите, пожалуйста, такой-то товар из корзины, я его заказл по ошибке"_
+\r\nВот и всё, заказ сформирован. Далее с Вами свяжутся, для уточнения деталей доставки. 
 \r\n/short - показать сокрщения
 '''
 startmessage = '''
@@ -52,7 +53,8 @@ def start(message):
     kbrd_start.add(btn3_start, btn2_start)
     mci = message.chat.id
     if message.text == '/start':
-        tb.send_message(mci, startmessage, parse_mode='Markdown', reply_markup=kbrd_start,disable_web_page_preview=True)
+        tb.send_message(mci, startmessage, parse_mode='Markdown', reply_markup=kbrd_start,
+                        disable_web_page_preview=True)
     elif message.text == '/short':
         tb.send_message(mci, short, parse_mode='Markdown', reply_markup=kbrd_start)
 
@@ -74,6 +76,7 @@ def get_number(message):
                              '(можете сказать сколько грамм мяса или сыра Вам отрезать или другие детали)'
                              '\r\n\r\n_Принимается только_ *первое* _голосовое сообщение_',
                         parse_mode='Markdown', reply_markup=kbrd_voice)
+        tb.delete_message(mci, message.message_id)
     if message.voice:
         ttime2 = message.date
         try:
@@ -89,9 +92,9 @@ def get_number(message):
                     tb.send_message(message.chat.id,
                                     '*Ваш заказ сформирован!\r\nМенеджер свяжется c Вами для уточнения деталей*',
                                     reply_markup=kbrd_start2, parse_mode='Markdown')
-                    tb.send_message(call.message.chat.id, 'Давайте вместе улучшим этот сервис!'
-                                                          'Расскажите, что можно улучшить'
-                                                          '\r\n https://t.me/joinchat/AAAAAElAAlQ_waJRJmk8LQ')
+                    tb.send_message(message.chat.id, 'Давайте вместе улучшим этот сервис!'
+                                                     'Расскажите, что можно улучшить'
+                                                     '\r\n https://t.me/joinchat/AAAAAElAAlQ_waJRJmk8LQ')
                     p = requests.post(URL_ED, params=data_to_us)
         except:
             tb.send_message(mci, manual, parse_mode='Markdown')
@@ -114,7 +117,6 @@ def voice(call):
         tb.send_message(call.message.chat.id, 'Давайте вместе улучшим этот сервис!'
                                               'Расскажите, что можно улучшить'
                                               '\r\n https://t.me/joinchat/AAAAAElAAlQ_waJRJmk8LQ')
-
         try:
             p = requests.post(URL_ED, params=data_to_us)
         except:
@@ -195,7 +197,7 @@ def show_categories(message):
 def back_to_cat(call):
     cmci = call.message.chat.id
     if call.data == 'back_to_cat':
-        tb.answer_callback_query(callback_query_id=call.id, show_alert=False, text="Назад в категории")
+        tb.answer_callback_query(callback_query_id=call.id, show_alert=False, text="Назад к категориям")
         kbrd_cats = types.InlineKeyboardMarkup(row_width=3)
         payload = {'type': 'categories', 'token': config.token_ed}
         r = requests.get(URL_ED, params=payload)
@@ -219,6 +221,7 @@ def show_inline(call):
     value_id = str(call.data)
 
     if 'cat' in value_id:
+        tb.answer_callback_query(callback_query_id=call.id, text='Загрузка товаров ', show_alert=False)
         data_products = {'type': 'products', 'token': config.token_ed}
         if 'offset' in value_id:
             # Was clicked on show more products
@@ -230,7 +233,6 @@ def show_inline(call):
             cat_id = value_id.replace('cat', '')
         data_products['cat_id'] = cat_id
         kbrd_products = types.InlineKeyboardMarkup(row_width=2)
-
         r1 = requests.get(URL_ED, params=data_products)
         r1 = r1.json()
         for i in r1['products']:
@@ -288,7 +290,8 @@ def show_inline(call):
             btn1_getphone = types.KeyboardButton('Поделиться ', request_contact=True)
             btn2_getphone = types.KeyboardButton('Назад')
             kbrd_getphone.add(btn2_getphone, btn1_getphone)
-            tb.send_message(cmci, 'Поделитесь номером телефоном\n\n'
+            tb.send_message(cmci, '*Поделитесь номером телефона*\n\n'
+                                  'нажм. *Поделиться* на кливиатуре\n\n'
                                   '_(Это нужно для уточнения деталей доставки)_', parse_mode='Markdown',
                             reply_markup=kbrd_getphone, )
             kbrd_start = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)

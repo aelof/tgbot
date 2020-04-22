@@ -52,7 +52,6 @@ def start(message):
     kbrd_start.add(btn3_start, btn2_start)
     mci = message.chat.id
     if message.text == '/start':
-        print('Начало работы бота')
         tb.send_message(mci, startmessage, parse_mode='Markdown', reply_markup=kbrd_start,
                         disable_web_page_preview=True)
     elif message.text == '/short':
@@ -121,7 +120,6 @@ def voice(call):
             p = requests.post(URL_ED, params=data_to_us)
         except:
             pass
-    print('Заказ подтвержден')
 
 
 # erase shoping cart

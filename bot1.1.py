@@ -22,7 +22,7 @@ def start(message):
         tb.send_message(mci, startmessage, parse_mode='Markdown', reply_markup=kb_start,
                         disable_web_page_preview=True)
     elif message.text == '/short':
-        tb.send_message(mci, short, parse_mode='Markdown', reply_markup=kbrd_start)
+        tb.send_message(mci, short, parse_mode='Markdown', reply_markup=kb_start)
     elif message.text == '/clear':
         for i in range(1000):
             try:
@@ -41,6 +41,8 @@ def start(message):
         if message.chat.username:
             tb.send_message('@new_visit',
                             f'new: {message.chat.first_name}[{message.chat.username}]: {mci} ')
+            alalitic = {}
+
             new_users[mci] = f'{message.chat.first_name}(@{message.chat.username})'
         else:
             tb.send_message('@new_visit', f'new:{message.chat.first_name}:{mci}: ')

@@ -40,7 +40,7 @@ c/м - свежезамороженные
 Куб.Бур. - Кубанская буренка
 
 '''
-prin
+
 @tb.message_handler(commands=['start', 'short'])
 def start(message):
     # buttons main menu
@@ -55,6 +55,7 @@ def start(message):
         tb.send_message(mci, startmessage, parse_mode='Markdown', reply_markup=kbrd_start,
                         disable_web_page_preview=True)
     elif message.text == '/short':
+        prin
         tb.send_message(mci, short, parse_mode='Markdown', reply_markup=kbrd_start)
 
 

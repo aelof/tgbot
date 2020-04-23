@@ -55,7 +55,7 @@ def start(message):
         tb.send_message(mci, startmessage, parse_mode='Markdown', reply_markup=kbrd_start,
                         disable_web_page_preview=True)
     elif message.text == '/short':
-        pri
+        pr
         tb.send_message(mci, short, parse_mode='Markdown', reply_markup=kbrd_start)
 
 

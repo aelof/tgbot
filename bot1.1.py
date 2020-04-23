@@ -34,7 +34,6 @@ def start(message):
     if message.text == '/show_me_all_users':
         try:
             tb.send_message(mci, show_user_list(new_users, message.date), parse_mode='Markdown')
-            print(show_user_list(new_users, message.date))
         except:
             tb.send_message(mci, 'Никого нет :(')
     # tracing new users / отследживание новых посетителей

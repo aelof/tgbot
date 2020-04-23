@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
-import time
 import telebot
 from telebot import types
 
 import json
 import requests
-import config
-from config import kb_getphone, kb_start, ikb1, show_user_list
-from config import manual, short, startmessage, contacts
+import config2
+from config2 import kb_getphone, kb_start, ikb1
+from config2 import manual, short, startmessage, contacts
 
-tb = telebot.TeleBot(config.token)
-URL_ED = config.URL_ED
+tb = telebot.TeleBot(config2.token)
+URL_ED = config2.URL_ED
 
 new_users = {}
 
@@ -30,23 +29,19 @@ def start(message):
             except:
                 i += 1
     if message.text == '/god':
-        tb.send_message(mci, '/show_me_all_users \r\n\r\n/clear')
-    if message.text == '/show_me_all_users':
-        try:
-            tb.send_message(mci, show_user_list(new_users, message.date), parse_mode='Markdown')
-        except:
-            tb.send_message(mci, 'Никого нет :(')
-    # tracing new users / отследживание новых посетителей
-    if mci not in new_users:
-        if message.chat.username:
-            tb.send_message('@new_visit',
-                            f'new: {message.chat.first_name}[{message.chat.username}]: {mci} ')
-            alalitic = {}
+        tb.send_message(mci, '\r\n\r\n/clear Режим Бога активирован')
 
-            new_users[mci] = f'{message.chat.first_name}(@{message.chat.username})'
-        else:
-            tb.send_message('@new_visit', f'new:{message.chat.first_name}:{mci}: ')
-            new_users[mci] = message.chat.first_name
+    # tracing new users / отследживание новых посетителей
+    if message.chat.username:
+        analitic = {'type': 'savelog', 'chat_id': mci, 'nic': message.chat.username,
+                    'firstname': message.chat.first_name, 'token': config2.token_ed}
+        tb.send_message('@new_visit',
+                        f'new: {message.chat.first_name}[@{message.chat.username}]: {mci}')
+
+    else:
+        analitic = {'type': 'savelog', 'chat_id': mci, 'firstname': message.chat.first_name, 'token': config2.token_ed}
+        tb.send_message('@new_visit', f'new:{message.chat.first_name}:{mci}')
+    anal = requests.get(URL_ED, params=analitic)
 
 
 # heandler phome number /заправшивает номер клиента
@@ -58,7 +53,7 @@ def get_number(message):
         ttime = message.date
         phone = message.contact.phone_number
         global data_to_us
-        data_to_us = {'type': 'sendorder', 'chat_id': mci, 'phone': phone, 'token': config.token_ed}
+        data_to_us = {'type': 'sendorder', 'chat_id': mci, 'phone': phone, 'token': config2.token_ed}
         kbrd_voice = types.InlineKeyboardMarkup()
         btn1_voice = types.InlineKeyboardButton('Деталей нет', callback_data='pass_voice')
         kbrd_voice.add(btn1_voice)
@@ -98,10 +93,10 @@ def voice(call):
                               '\r\n https://t.me/joinchat/AAAAAElAAlQ_waJRJmk8LQ')
         tb.answer_callback_query(call.id, 'Ваш заказ оформлен!', show_alert=True)
 
-        # try:
-        #     p = requests.post(URL_ED, params=data_to_us)
-        # except:
-        #     pass
+        try:
+            p = requests.post(URL_ED, params=data_to_us)
+        except:
+            pass
 
 
 # erase shoping cart
@@ -114,7 +109,7 @@ def cart0(call):
 
         tb.edit_message_text(chat_id=cmci, message_id=call.message.message_id,
                              text='Вы очистили корзину', reply_markup=None)
-        data_erase_cart = {'type': 'clearcart', 'chat_id': cmci, 'token': config.token_ed}
+        data_erase_cart = {'type': 'clearcart', 'chat_id': cmci, 'token': config2.token_ed}
         z = requests.post(URL_ED, params=data_erase_cart)
 
 
@@ -127,7 +122,7 @@ def shoping_cart(message):
     btn2_cart = types.InlineKeyboardButton("Заказать!", callback_data='offer', )
     kbrd_cart.add(btn1_cart, btn2_cart)
     global r_cart
-    data_cart = {'type': 'getcart', 'chat_id': mci, 'token': config.token_ed}
+    data_cart = {'type': 'getcart', 'chat_id': mci, 'token': config2.token_ed}
     r_cart = requests.get(URL_ED, params=data_cart)
     r_cart = r_cart.json()
     if r_cart['products']:
@@ -153,7 +148,6 @@ def off_er(call):
         tb.send_message(cmci, '*Поделитесь номером телефона*\n\n'
                               'нажм. *Поделиться* на кливиатуре\n\n',
                         parse_mode='Markdown', reply_markup=kb_getphone, )
-        time.sleep(10)
         global mpd  # message with  phone number delete
         mpd = call.message.message_id + 1
         # tb.delete_message(call.message.chat.id, mpd)
@@ -211,7 +205,7 @@ def show_inline(call):
 
     if 'cat' in value_id:
         tb.answer_callback_query(callback_query_id=call.id, text='Загрузка товаров ', show_alert=False)
-        data_products = {'type': 'products', 'token': config.token_ed}
+        data_products = {'type': 'products', 'token': config2.token_ed}
         if 'offset' in value_id:
             # Was clicked on show more products
             value_params = value_id.split('|')
@@ -256,7 +250,7 @@ def show_inline(call):
         tb.answer_callback_query(callback_query_id=call.id, show_alert=False,
                                  text=answer)
         prod_id = value_id.replace('prod', '')
-        data_addtocart = {'type': 'addtocart', 'chat_id': cmci, 'prod_id': prod_id, 'token': config.token_ed}
+        data_addtocart = {'type': 'addtocart', 'chat_id': cmci, 'prod_id': prod_id, 'token': config2.token_ed}
         r1 = requests.get(URL_ED, params=data_addtocart)
         r1 = r1.json()
         answer1 = f"Сумма заказа: {r1['total_price']} р."

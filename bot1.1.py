@@ -40,7 +40,7 @@ c/м - свежезамороженные
 Куб.Бур. - Кубанская буренка
 
 '''
-
+prin
 @tb.message_handler(commands=['start', 'short'])
 def start(message):
     # buttons main menu

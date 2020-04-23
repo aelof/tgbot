@@ -1,65 +1,54 @@
 # -*- coding: utf-8 -*-
-
+import time
 import telebot
 from telebot import types
 
 import json
 import requests
 import config
+from config import kb_getphone, kb_start, ikb1, show_user_list
+from config import manual, short, startmessage, contacts
 
 tb = telebot.TeleBot(config.token)
 URL_ED = config.URL_ED
 
-manual = '''
-*Инструкция пользования:*\r\n
-*Оплата происходит после получения (налич./безнал.)\r\nДоставка происходит после 16:00*
-\r\nДля того, чтобы добавить товар в корзину нажм. на кнопку с названием продукта. \r\n
-Хотите добавить второй такой же товар - нажмите на продукт ещё раз .\r\n
-Весь заказ в любой момент можно просмотреть нажав. *Корзина* 🧺
-Хотите оформить заказ - нажм. *заказать*, после этого
-Вам будет предложено поделиться номером телефона и оставить голосовое 
-сообщения для внесения поправок в заказ _напр. "Отрежьте, пожалуйста,  350 гр. сыра "Черный Принц!" 
-(по умолчанию добавляет 1 кг.)_ \r\nили _"Уберите, пожалуйста, такой-то товар из корзины, я его заказл по ошибке"_
-\r\nВот и всё, заказ сформирован. Далее с Вами свяжутся, для уточнения деталей доставки. 
-\r\n/short - показать сокрщения
-'''
-startmessage = '''
-Бот доставки 🚙 продуктов по Геленджику.\n
-Поможет заказать продукты домой 🏠
-Ассортимент пока мал, но *постоянно* пополняется !\n
-_Рекомендуется ознакомиться с его работой (нажм."Инструкция")_',
-\r\nОбсуждения -https://t.me/deliveryGLK
-'''
-short = '''
-*Сокращения:*
-б/к - без кости
-c/м - свежезамороженные
-подбед. - подбедерок
-копч. - копченая 
-Куб.Мол. - Кубанский молочник
-Куб.Бур. - Кубанская буренка
+new_users = {}
 
-'''
 
-@tb.message_handler(commands=['start', 'short'])
+@tb.message_handler(commands=['start', 'short', 'clear', 'show_me_all_users', 'god'])
 def start(message):
-    # buttons main menu
-    kbrd_start = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=3)
-    btn1_start = types.KeyboardButton('Заказать продукты 🍽')
-    btn2_start = types.KeyboardButton('Корзина 🧺')
-    btn3_start = types.KeyboardButton('Инструкция 📕')
-    kbrd_start.add(btn1_start)
-    kbrd_start.add(btn3_start, btn2_start)
     mci = message.chat.id
     if message.text == '/start':
-        tb.send_message(mci, startmessage, parse_mode='Markdown', reply_markup=kbrd_start,
+        tb.send_message(mci, startmessage, parse_mode='Markdown', reply_markup=kb_start,
                         disable_web_page_preview=True)
     elif message.text == '/short':
-        pr
         tb.send_message(mci, short, parse_mode='Markdown', reply_markup=kbrd_start)
+    elif message.text == '/clear':
+        for i in range(1000):
+            try:
+                tb.delete_message(message.chat.id, message.message_id - i)  # delete all msgs
+            except:
+                i += 1
+    if message.text == '/god':
+        tb.send_message(mci, '/show_me_all_users \r\n\r\n/clear')
+    if message.text == '/show_me_all_users':
+        try:
+            tb.send_message(mci, show_user_list(new_users, message.date), parse_mode='Markdown')
+            print(show_user_list(new_users, message.date))
+        except:
+            tb.send_message(mci, 'Никого нет :(')
+    # tracing new users / отследживание новых посетителей
+    if mci not in new_users:
+        if message.chat.username:
+            tb.send_message('@new_visit',
+                            f'new: {message.chat.first_name}[{message.chat.username}]: {mci} ')
+            new_users[mci] = f'{message.chat.first_name}(@{message.chat.username})'
+        else:
+            tb.send_message('@new_visit', f'new:{message.chat.first_name}:{mci}: ')
+            new_users[mci] = message.chat.first_name
 
 
-# heandler phome nimber /заправшивает номер клиента
+# heandler phome number /заправшивает номер клиента
 @tb.message_handler(content_types=['contact', 'voice'])
 def get_number(message):
     mci = message.chat.id
@@ -76,75 +65,67 @@ def get_number(message):
                              '(можете сказать сколько грамм мяса или сыра Вам отрезать или убрать, по ошибке добавленный товар)'
                              '\r\n\r\n_Принимается только_ *первое* _голосовое сообщение_',
                         parse_mode='Markdown', reply_markup=kbrd_voice)
-        tb.delete_message(mci, message.message_id)
+        # # tb.delete_message(mci, message.message_id)
     if message.voice:
         ttime2 = message.date
         try:
             if ttime:
                 if ttime2 > ttime:
-                    kbrd_start2 = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=3)
-                    btn1_start = types.KeyboardButton('Заказать продукты 🍽')
-                    btn2_start = types.KeyboardButton('Корзина 🧺 ')
-                    btn3_start = types.KeyboardButton('Инструкция 📕')
-                    kbrd_start2.add(btn1_start)
-                    kbrd_start2.add(btn3_start, btn2_start)
                     tb.forward_message("@deliiivery", mci, message.message_id)
                     tb.send_message(message.chat.id,
                                     '*Ваш заказ сформирован!\r\nМенеджер свяжется c Вами для уточнения деталей*',
-                                    reply_markup=kbrd_start2, parse_mode='Markdown')
+                                    reply_markup=kb_start, parse_mode='Markdown')
                     tb.send_message(message.chat.id, 'Давайте вместе улучшим этот сервис!'
                                                      'Расскажите, что можно улучшить'
                                                      '\r\n https://t.me/joinchat/AAAAAElAAlQ_waJRJmk8LQ')
                     p = requests.post(URL_ED, params=data_to_us)
         except:
             tb.send_message(mci, manual, parse_mode='Markdown')
+    global ms9
+    ms9 = message.message_id
 
 
 # pass_voice
 @tb.callback_query_handler(func=lambda call: call.data == 'pass_voice')
 def voice(call):
+    cmci = call.message.chat.id
     if call.data == 'pass_voice':
-        tb.delete_message(call.message.chat.id, call.message.message_id)
-        kbrd_start2 = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-        btn1_start = types.KeyboardButton('Заказать продукты 🍽')
-        btn2_start = types.KeyboardButton('Корзина 🧺')
-        btn3_start = types.KeyboardButton('Инструкция 📕')
-        kbrd_start2.add(btn1_start)
-        kbrd_start2.add(btn3_start, btn2_start)
-        tb.send_message(call.message.chat.id,
-                        '*Ваш заказ сформирован!\r\nМенеджер свяжется c Вами для уточнения деталей*',
-                        reply_markup=kbrd_start2, parse_mode='Markdown')
-        tb.send_message(call.message.chat.id, 'Давайте вместе улучшим этот сервис!'
-                                              'Расскажите, что можно улучшить'
-                                              '\r\n https://t.me/joinchat/AAAAAElAAlQ_waJRJmk8LQ')
-        try:
-            p = requests.post(URL_ED, params=data_to_us)
-        except:
-            pass
+        # tb.delete_message(cmci, call.message.message_id)
+        tb.send_message(cmci, '*Ваш заказ сформирован!\r\nМенеджер свяжется c Вами для уточнения деталей*',
+                        reply_markup=kb_start, parse_mode='Markdown')
+        tb.send_message(cmci, 'Давайте вместе сделаем самую удобную доставку!\r\nРасскажите, что можно улучшить '
+                              '\r\n https://t.me/joinchat/AAAAAElAAlQ_waJRJmk8LQ')
+        tb.answer_callback_query(call.id, 'Ваш заказ оформлен!', show_alert=True)
+
+        # try:
+        #     p = requests.post(URL_ED, params=data_to_us)
+        # except:
+        #     pass
 
 
 # erase shoping cart
 @tb.callback_query_handler(func=lambda call: call.data == 'erase_cart')
 def cart0(call):
+    cmci = call.message.chat.id
     if call.data == 'erase_cart':
-        cmci = call.message.chat.id
-        data_erase_cart = {'type': 'clearcart', 'chat_id': cmci, 'token': config.token_ed}
-        z = requests.post(URL_ED, params=data_erase_cart)
         tb.answer_callback_query(callback_query_id=call.id, show_alert=False,
-                                 text="Корзина ощищена")
+                                 text="Корзина очищается")
 
         tb.edit_message_text(chat_id=cmci, message_id=call.message.message_id,
                              text='Вы очистили корзину', reply_markup=None)
+        data_erase_cart = {'type': 'clearcart', 'chat_id': cmci, 'token': config.token_ed}
+        z = requests.post(URL_ED, params=data_erase_cart)
 
 
 # shoping cart / Корзина
-@tb.message_handler(func=lambda message: message.text == 'Корзина 🧺')
+@tb.message_handler(func=lambda message: message.text == 'Корзина 🛒')
 def shoping_cart(message):
+    mci = message.chat.id
     kbrd_cart = types.InlineKeyboardMarkup()
     btn1_cart = types.InlineKeyboardButton("Очистить корзину", callback_data='erase_cart')
     btn2_cart = types.InlineKeyboardButton("Заказать!", callback_data='offer', )
     kbrd_cart.add(btn1_cart, btn2_cart)
-    mci = message.chat.id
+    global r_cart
     data_cart = {'type': 'getcart', 'chat_id': mci, 'token': config.token_ed}
     r_cart = requests.get(URL_ED, params=data_cart)
     r_cart = r_cart.json()
@@ -163,31 +144,44 @@ def shoping_cart(message):
         tb.send_message(mci, "Корзина пуста\r\nЗакажите что-нибудь:)")
 
 
+@tb.callback_query_handler(func=lambda call: call.data == 'offer')
+def off_er(call):
+    if r_cart['total_price'] > 1200:
+        cmci = call.message.chat.id
+        tb.answer_callback_query(callback_query_id=call.id, text='Данные для доставки ', show_alert=False)
+        tb.send_message(cmci, '*Поделитесь номером телефона*\n\n'
+                              'нажм. *Поделиться* на кливиатуре\n\n',
+                        parse_mode='Markdown', reply_markup=kb_getphone, )
+        time.sleep(10)
+        global mpd  # message with  phone number delete
+        mpd = call.message.message_id + 1
+        # tb.delete_message(call.message.chat.id, mpd)
+    else:
+        cmci = call.message.chat.id
+        tb.answer_callback_query(callback_query_id=call.id, text='Сумма заказа меньше 1200', show_alert=False)
+        kb_cats = types.InlineKeyboardMarkup(row_width=3)
+        kb_cats.add(*ikb1)
+        tb.send_message(cmci, 'Добавьте ещё продуктов, чтобы сумма заказа была *от 1200 рублей*',
+                        parse_mode='Markdown', reply_markup=kb_cats, )
+
+
 @tb.message_handler(content_types='text')
 def show_categories(message):
     mci = message.chat.id
+
     if message.text == 'Заказать продукты 🍽':
-        kbrd_cats = types.InlineKeyboardMarkup(row_width=3)
-        data_cat = {'type': 'categories', 'token': config.token_ed}
-        r0 = requests.get(URL_ED, params=data_cat)
-        list = []
-        r0 = r0.json()
-        for i in r0:
-            item = types.InlineKeyboardButton(str(i['name']), callback_data='cat' + str(i['id']))
-            list.append(item)
-        kbrd_cats.add(*list)
+        global ms1
+        ms1 = message.message_id
+        kb_cats = types.InlineKeyboardMarkup(row_width=3)
+        kb_cats.add(*ikb1)
         tb.send_message(mci, "Минимальная сумма заказа *1200 рублей.* \r\n\r\nВыберите категорию: \r\n  ",
-                        parse_mode='Markdown', reply_markup=kbrd_cats)
-    elif message.text == 'Инструкция 📕':
+                        parse_mode='Markdown', reply_markup=kb_cats)
+    elif message.text == 'Инструкция 📙':
         tb.send_message(mci, manual, parse_mode='Markdown')
-    elif message.text == 'Назад':
-        kbrd_start = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-        btn1_start = types.KeyboardButton('Заказать продукты 🍽')
-        btn2_start = types.KeyboardButton('Корзина 🧺')
-        btn3_start = types.KeyboardButton('Инструкция 📕')
-        kbrd_start.add(btn1_start)
-        kbrd_start.add(btn3_start, btn2_start)
-        tb.send_message(mci, 'Вы перешли в главное меню\r\nКорзина заполнена', reply_markup=kbrd_start)
+    elif message.text == 'Контакты 📱':
+        tb.send_message(mci, contacts, parse_mode='Markdown', disable_web_page_preview=True)
+    elif message.text == '< В меню':
+        tb.send_message(mci, 'Вы перешли в главное меню\r\nТовары в корзине', reply_markup=kb_start)
     else:
         tb.send_message(mci, manual, parse_mode='Markdown')
 
@@ -198,23 +192,17 @@ def back_to_cat(call):
     cmci = call.message.chat.id
     if call.data == 'back_to_cat':
         tb.answer_callback_query(callback_query_id=call.id, show_alert=False, text="Назад к категориям")
-        kbrd_cats = types.InlineKeyboardMarkup(row_width=3)
-        payload = {'type': 'categories', 'token': config.token_ed}
-        r = requests.get(URL_ED, params=payload)
-        r = r.json()
-        list2 = []
-        for i in r:
-            item = types.InlineKeyboardButton(str(i['name']), callback_data='cat' + str(i['id']))
-            list2.append(item)
-        kbrd_cats.add(*list2)
+        kb_cats = types.InlineKeyboardMarkup(row_width=3)
+        kb_cats.add(*ikb1)
         try:
             tb.delete_message(cmci, message_id=mid)  # message index to delete
         except:
             pass
-        tb.send_message(cmci, "Выберите категорию: ", reply_markup=kbrd_cats)
+        tb.send_message(cmci, "Выберите категорию: ", reply_markup=kb_cats)
+        tb.answer_callback_query(call.id, 'Чат успешно очищен', show_alert=False)
 
 
-# heandler for all call back
+# heandler for all call
 @tb.callback_query_handler(func=lambda call: True)
 def show_inline(call):
     cmci = call.message.chat.id
@@ -240,16 +228,21 @@ def show_inline(call):
                 item = types.InlineKeyboardButton(f'{i["name"]}-{i["price"]}р./{i["weight"]}г.',
                                                   callback_data="prod" + str(i["id"]))
             else:
-                item = types.InlineKeyboardButton(f'{i["name"]} - {i["price"]}р.', callback_data="prod" + str(i["id"]))
+                item = types.InlineKeyboardButton(f'{i["name"]} - {i["price"]}р.',
+                                                  callback_data="prod" + str(i["id"]))
             kbrd_products.add(item)
 
         if 'next_offset' in r1:
             # Category has more products let's' show them
-            kbrd_products.add(types.InlineKeyboardButton('Показать ещё ➡️',
-                                                         callback_data='cat' + str(cat_id) + '|offset' + str(
-                                                             r1['next_offset'])))
-        kbrd_back_to_cat = types.InlineKeyboardButton('⬅️ В категории', callback_data='back_to_cat')
-        kbrd_products.add(kbrd_back_to_cat)
+            kb_showmore = types.InlineKeyboardButton('Показать ещё ➡',
+                                                     callback_data='cat' + str(cat_id) + '|offset' + str(
+                                                         r1['next_offset']))
+
+        kbrd_back_to_cat = types.InlineKeyboardButton('⬅ В категории', callback_data='back_to_cat')
+        try:
+            kbrd_products.add(kbrd_back_to_cat, kb_showmore)
+        except:
+            kbrd_products.add(kbrd_back_to_cat)
         global mid
         mid = call.message.message_id
         tb.edit_message_text(chat_id=cmci, message_id=call.message.message_id,
@@ -258,45 +251,17 @@ def show_inline(call):
                              parse_mode='Markdown', reply_markup=kbrd_products)
 
     elif 'prod' in value_id:
+        answer = f"Добавлено в корзину."  # Сумма заказа: {r1['total_price']} р."
+        tb.answer_callback_query(callback_query_id=call.id, show_alert=False,
+                                 text=answer)
         prod_id = value_id.replace('prod', '')
         data_addtocart = {'type': 'addtocart', 'chat_id': cmci, 'prod_id': prod_id, 'token': config.token_ed}
         r1 = requests.get(URL_ED, params=data_addtocart)
         r1 = r1.json()
-        if 'new_product_id' not in r1:
-            answer = 'Товар уже есть в корзине'
-        else:
-            answer = f"Добавлено в корзину. Сумма заказа: {r1['total_price']} р."
-        tb.answer_callback_query(callback_query_id=call.id, show_alert=False,
-                                 text=answer)
+        answer1 = f"Сумма заказа: {r1['total_price']} р."
 
-    if call.data == 'offer':
-        data_cart = {'type': 'getcart', 'chat_id': call.message.chat.id, 'token': config.token_ed}
-        r_cart = requests.get(URL_ED, params=data_cart)
-        r_cart = r_cart.json()
-        if r_cart['total_price'] < 1200:
-            kbrd_cats = types.InlineKeyboardMarkup(row_width=3)
-            data_cat = {'type': 'categories', 'token': config.token_ed}
-            r0 = requests.get(URL_ED, params=data_cat)
-            list1 = []
-            r0 = r0.json()
-            for i in r0:
-                item = types.InlineKeyboardButton(str(i['name']), callback_data='cat' + str(i['id']))
-                list1.append(item)
-            kbrd_cats.add(*list1)
-            tb.send_message(cmci, 'Добавьте ещё продуктов, чтобы сумма заказа была *от 1200 рублей*',
-                            reply_markup=kbrd_cats, parse_mode='Markdown')
-        else:
-            kbrd_getphone = types.ReplyKeyboardMarkup(resize_keyboard=1, one_time_keyboard=True)
-            btn1_getphone = types.KeyboardButton('Поделиться ', request_contact=True)
-            btn2_getphone = types.KeyboardButton('Назад')
-            kbrd_getphone.add(btn2_getphone, btn1_getphone)
-            tb.send_message(cmci, '*Поделитесь номером телефона*\n\n'
-                                  'нажм. *Поделиться* на кливиатуре\n\n'
-                                  '_(Это нужно для уточнения деталей доставки)_', parse_mode='Markdown',
-                            reply_markup=kbrd_getphone, )
-            kbrd_start = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+        tb.answer_callback_query(callback_query_id=call.id, show_alert=False, text=answer1)
 
 
 # start bot
-
 tb.polling(none_stop=True)

@@ -73,7 +73,7 @@ def get_number(message):
         btn1_voice = types.InlineKeyboardButton('Деталей нет', callback_data='pass_voice')
         kbrd_voice.add(btn1_voice)
         tb.send_message(mci, 'Отправьте голосовое с указанием деталей\r\n\r\n'
-                             '(можете сказать сколько грамм мяса или сыра Вам отрезать или другие детали)'
+                             '(можете сказать сколько грамм мяса или сыра Вам отрезать или убрать, по ошибке добавленный товар)'
                              '\r\n\r\n_Принимается только_ *первое* _голосовое сообщение_',
                         parse_mode='Markdown', reply_markup=kbrd_voice)
         tb.delete_message(mci, message.message_id)

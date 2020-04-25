@@ -14,7 +14,7 @@ URL_ED = config.URL_ED
 new_users = {}
 
 
-@tb.message_handler(commands=['start', 'short', 'clear', 'show_me_all_users', 'god'])
+@tb.message_handler(commands=['start', 'short', 'clear',  'god'])
 def start(message):
     mci = message.chat.id
     if message.text == '/start':
@@ -35,12 +35,13 @@ def start(message):
     if message.chat.username:
         analitic = {'type': 'savelog', 'chat_id': mci, 'nic': message.chat.username,
                     'firstname': message.chat.first_name, 'token': config.token_ed}
-        tb.send_message('@new_visit',
-                        f'new: {message.chat.first_name}[@{message.chat.username}]: {mci}')
+        if mci not in [405529066, 239090651]:
+            tb.send_message('@new_visit', f'new:{message.chat.first_name}:{mci}')
 
     else:
         analitic = {'type': 'savelog', 'chat_id': mci, 'firstname': message.chat.first_name, 'token': config.token_ed}
-        tb.send_message('@new_visit', f'new:{message.chat.first_name}:{mci}')
+        if mci not in [405529066, 239090651]:
+            tb.send_message('@new_visit', f'new:{message.chat.first_name}:{mci}')
     anal = requests.get(URL_ED, params=analitic)
 
 

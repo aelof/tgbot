@@ -49,15 +49,15 @@ def start(message):
 def get_number(message):
     mci = message.chat.id
     global ttime
+    global data_to_us
     if message.contact:
         ttime = message.date
         phone = message.contact.phone_number
-        global data_to_us
         data_to_us = {'type': 'sendorder', 'chat_id': mci, 'phone': phone, 'token': config.token_ed}
         kbrd_voice = types.InlineKeyboardMarkup()
         btn1_voice = types.InlineKeyboardButton('Деталей нет', callback_data='pass_voice')
         kbrd_voice.add(btn1_voice)
-        tb.send_message(mci, 'Отправьте голосовое с указанием деталей\r\n\r\n'
+        tb.send_message(mci, '*Отправьте голосовое с указанием деталей*\r\n\r\n'
                              '(можете сказать сколько грамм мяса или сыра Вам отрезать или убрать, по ошибке добавленный товар)'
                              '\r\n\r\n_Принимается только_ *первое* _голосовое сообщение_',
                         parse_mode='Markdown', reply_markup=kbrd_voice)
@@ -65,16 +65,15 @@ def get_number(message):
     if message.voice:
         ttime2 = message.date
         try:
-            if ttime:
-                if ttime2 > ttime:
-                    tb.forward_message("@deliiivery", mci, message.message_id)
-                    tb.send_message(message.chat.id,
-                                    '*Ваш заказ сформирован!\r\nМенеджер свяжется c Вами для уточнения деталей*',
-                                    reply_markup=kb_start, parse_mode='Markdown')
-                    tb.send_message(message.chat.id, 'Давайте вместе улучшим этот сервис!'
-                                                     'Расскажите, что можно улучшить'
-                                                     '\r\n https://t.me/joinchat/AAAAAElAAlQ_waJRJmk8LQ')
-                    p = requests.post(URL_ED, params=data_to_us)
+            if ttime2 > ttime:
+                tb.forward_message("@deliiivery", mci, message.message_id)
+                tb.send_message(message.chat.id,
+                                '*Ваш заказ сформирован!\r\nМенеджер свяжется c Вами для уточнения деталей*',
+                                reply_markup=kb_start, parse_mode='Markdown')
+                tb.send_message(message.chat.id, 'Давайте вместе улучшим этот сервис!'
+                                                 'Расскажите, что можно улучшить'
+                                                 '\r\n https://t.me/joinchat/AAAAAElAAlQ_waJRJmk8LQ')
+                requests.post(URL_ED, params=data_to_us)
         except:
             tb.send_message(mci, manual, parse_mode='Markdown')
 

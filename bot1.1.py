@@ -11,7 +11,7 @@ from config import manual, short, startmessage, contacts
 tb = telebot.TeleBot(config.token)
 URL_ED = config.URL_ED
 
-
+#
 
 @tb.message_handler(commands=['start', 'short', 'clear',  'god'])
 def start(message):

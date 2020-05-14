@@ -61,7 +61,7 @@ def get_number(message):
                              '(можете сказать сколько грамм мяса или сыра Вам отрезать или убрать, по ошибке добавленный товар)'
                              '\r\n\r\n_Принимается только_ *первое* _голосовое сообщение_',
                         parse_mode='Markdown', reply_markup=kbrd_voice)
-        # # tb.delete_message(mci, message.message_id)
+        tb.delete_message(mci, message.message_id)
     if message.voice:
         ttime2 = message.date
         try:
@@ -77,8 +77,7 @@ def get_number(message):
                     p = requests.post(URL_ED, params=data_to_us)
         except:
             tb.send_message(mci, manual, parse_mode='Markdown')
-    global ms9
-    ms9 = message.message_id
+
 
 
 # pass_voice
@@ -94,7 +93,7 @@ def voice(call):
         tb.answer_callback_query(call.id, 'Ваш заказ оформлен!', show_alert=True)
 
         try:
-            p = requests.post(URL_ED, params=data_to_us)
+            requests.post(URL_ED, params=data_to_us)
         except:
             pass
 

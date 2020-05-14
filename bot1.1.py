@@ -241,9 +241,7 @@ def show_inline(call):
         global mid
         mid = call.message.message_id
         tb.edit_message_text(chat_id=cmci, message_id=call.message.message_id,
-                             text=f'\r\nТовары в категории:\r\n\r\n\r\n',
-                             # *{namecat(value_id)} \r\n*_руб/кг(шт)_ ',
-                             parse_mode='Markdown', reply_markup=kbrd_products)
+                             text=f'Товары в категории:', reply_markup=kbrd_products)
 
     elif 'prod' in value_id:
         answer = f"Добавлено в корзину."  # Сумма заказа: {r1['total_price']} р."

@@ -23,7 +23,7 @@ def start(message):
     elif message.text == '/short':
         tb.send_message(mci, short, parse_mode='Markdown', reply_markup=kb_start)
     elif message.text == '/clear':
-        for i in range(1000):
+        for i in range(100):
             try:
                 tb.delete_message(message.chat.id, message.message_id - i)  # delete all msgs
             except:
@@ -36,7 +36,7 @@ def start(message):
         analitic = {'type': 'savelog', 'chat_id': mci, 'nic': message.chat.username,
                     'firstname': message.chat.first_name, 'token': config.token_ed}
         if mci not in [405529066, 239090651]:
-            tb.send_message('@new_visit', f'new:{message.chat.first_name}:{mci}')
+            tb.send_message('@new_visit', f'new:{message.chat.first_name},{message.chat.username};id = {mci}')
 
     else:
         analitic = {'type': 'savelog', 'chat_id': mci, 'firstname': message.chat.first_name, 'token': config.token_ed}

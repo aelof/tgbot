@@ -1,45 +1,35 @@
+#
 # -*- coding: utf-8 -*-
-import requests
 import telebot
 from telebot import types
 
+import json
+import requests
 import config
 from config import kb_getphone, kb_start, ikb1
-from config import Text
-
+from config import manual, short, startmessage
 
 tb = telebot.TeleBot(config.token)
 URL_ED = config.URL_ED
 
-
 #
 
-@tb.message_handler(commands=['start', 'short', 'clear', 'delivery_info', 'payment', 'commands'])
+@tb.message_handler(commands=['start', 'short', 'clear',  'god'])
 def start(message):
     mci = message.chat.id
     if message.text == '/start':
-        tb.send_message(mci, Text.startmessage, parse_mode='Markdown', reply_markup=kb_start,
+        tb.send_message(mci, startmessage, parse_mode='Markdown', reply_markup=kb_start,
                         disable_web_page_preview=True)
-
     elif message.text == '/short':
-        tb.send_message(mci, Text.short, parse_mode='Markdown', reply_markup=kb_start)
-
+        tb.send_message(mci, short, parse_mode='Markdown', reply_markup=kb_start)
     elif message.text == '/clear':
         for i in range(100):
             try:
                 tb.delete_message(message.chat.id, message.message_id - i)  # delete all msgs
             except:
                 i += 1
-
-    elif message.text == '/payment':
-        tb.send_message(mci, Text.payment, parse_mode='Markdown', reply_markup=kb_start)
-
-    elif message.text == '/delivery_info':
-        tb.send_message(mci, Text.delivery_info, parse_mode='Markdown', reply_markup=kb_start)
-
-    elif message.text == '/commands':
-        tb.send_message(mci, Text.commands)
-
+    if message.text == '/god':
+        tb.send_message(mci, '\r\n\r\n/clear Режим Бога активирован')
 
     # tracing new users / отследживание новых посетителей
     if message.chat.username:
@@ -86,7 +76,8 @@ def get_number(message):
                                                  '\r\n https://t.me/joinchat/AAAAAElAAlQ_waJRJmk8LQ')
                 # requests.post(URL_ED, params=data_to_us)
         except:
-            tb.send_message(mci, Text.manual, parse_mode='Markdown')
+            tb.send_message(mci, manual, parse_mode='Markdown')
+
 
 
 # pass_voice
@@ -180,13 +171,13 @@ def show_categories(message):
         tb.send_message(mci, "Минимальная сумма заказа *1200 рублей.* \r\n\r\nВыберите категорию: \r\n  ",
                         parse_mode='Markdown', reply_markup=kb_cats)
     elif message.text == 'Инструкция 📙':
-        tb.send_message(mci, Text.manual, parse_mode='Markdown')
-    # elif message.text == 'Контакты 📱':
-    #     tb.send_message(mci, contacts, parse_mode='Markdown', disable_web_page_preview=True)
+        tb.send_message(mci, manual, parse_mode='Markdown')
+    elif message.text == 'Контакты 📱':
+        tb.send_message(mci, contacts, parse_mode='Markdown', disable_web_page_preview=True)
     elif message.text == '< В меню':
         tb.send_message(mci, 'Вы перешли в главное меню\r\nТовары в корзине', reply_markup=kb_start)
     else:
-        tb.send_message(mci, Text.manual, parse_mode='Markdown')
+        tb.send_message(mci, manual, parse_mode='Markdown')
 
 
 # heandler for button "back to categories"

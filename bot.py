@@ -6,8 +6,7 @@ from telebot import types
 import json
 import requests
 import config
-from config import kb_getphone, kb_start, ikb1
-from config import manual, short, startmessage
+from config import kb_getphone, kb_start, ikb1,manual, short, startmessage
 
 tb = telebot.TeleBot(config.token)
 URL_ED = config.URL_ED
